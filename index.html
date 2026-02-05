@@ -21,6 +21,9 @@
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
+    <!-- Pannellum CSS -->
+    <link rel="stylesheet" href="css/pannellum.css" />
+
     <style>
         :root {
             /* Premium Forest & Mountain Palette */
@@ -848,6 +851,47 @@
         .exterior-item:hover img {
             transform: scale(1.05);
         }
+
+        /* Virtual Tour */
+        #virtual-tour {
+            padding: clamp(7rem, 12vw, 11rem) 0;
+            background: var(--bg-cream);
+        }
+
+        .tour-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tour-btn {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--accent);
+            color: var(--text-dark);
+            padding: 0.8rem 2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .tour-btn:hover,
+        .tour-btn.active {
+            background: var(--accent);
+            color: var(--white);
+        }
+
+        .panorama-viewer {
+            width: 100%;
+            height: 550px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            background: #000;
+        }
     </style>
 </head>
 
@@ -975,12 +1019,47 @@
         </div>
     </section>
 
+    <section id="virtual-tour">
+        <div class="container">
+            <div class="section-header fade-up">
+                <div class="section-subtitle">360° zážitek</div>
+                <h2>Virtuální prohlídka</h2>
+                <div class="divider center"></div>
+                <p>Prozkoumejte interiéry apartmánů a okolí v plném rozsahu</p>
+            </div>
+
+            <div class="tour-container fade-up">
+                <div class="tour-tabs">
+                    <button class="tour-btn active" onclick="loadScene('scene1')">Pohled 1</button>
+                    <button class="tour-btn" onclick="loadScene('scene2')">Pohled 2</button>
+                    <button class="tour-btn" onclick="loadScene('scene3')">Pohled 3</button>
+                </div>
+
+                <div id="panorama" class="panorama-viewer"></div>
+            </div>
+
+            <div class="street-view-container fade-up" style="margin-top: 5rem;">
+                <div class="section-header" style="margin-bottom: 3rem;">
+                    <h3>Google Street View</h3>
+                    <p>Virtuální procházka po okolí</p>
+                </div>
+                <div class="map-section" style="height: 500px;">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!4v1707145000000!6m8!1m7!1sCIABIhDyWyn2A8SiZxSHHVO3vy4H!2m2!1d49.632739!2d18.4620123!3f240!4f0!5f0.7820865974627469"
+                        width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section id="exterior">
         <div class="container">
             <div class="section-header fade-up">
                 <div class="section-subtitle">Okolí & Příroda</div>
                 <h2>Venkovní Galerie</h2>
                 <div class="divider center"></div>
+
                 <p>Prohlédněte si exteriér našich apartmánů a krásné okolí Beskyd</p>
             </div>
             <div class="exterior-grid" id="exteriorGrid">
@@ -1043,6 +1122,7 @@
     </footer>
 
     <!-- Scripts -->
+    <script src="js/pannellum.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         const aptData = {
@@ -1204,6 +1284,53 @@
 
         // Set Current Year
         document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Pannellum Viewer
+        let viewer;
+
+        function initViewer() {
+            if (!document.getElementById('panorama')) return;
+
+            viewer = pannellum.viewer('panorama', {
+                "default": {
+                    "firstScene": "scene1",
+                    "autoLoad": true,
+                    "autoRotate": -2,
+                    "hfov": 100,
+                    "compass": true
+                },
+                "scenes": {
+                    "scene1": {
+                        "title": "Pohled 1",
+                        "type": "equirectangular",
+                        "panorama": "fotky/360 view/Apartmány pod Prašivou (1).webp"
+                    },
+                    "scene2": {
+                        "title": "Pohled 2",
+                        "type": "equirectangular",
+                        "panorama": "fotky/360 view/Apartmány pod Prašivou (2).webp"
+                    },
+                    "scene3": {
+                        "title": "Pohled 3",
+                        "type": "equirectangular",
+                        "panorama": "fotky/360 view/Apartmány pod Prašivou (3).webp"
+                    }
+                }
+            });
+        }
+
+        // Defer init until section is visible to save resources, or just on load
+        // For simplicity:
+        window.addEventListener('load', initViewer);
+
+        function loadScene(sceneId) {
+            if (viewer) {
+                viewer.loadScene(sceneId);
+                // Update buttons
+                document.querySelectorAll('.tour-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+            }
+        }
     </script>
 </body>
 
